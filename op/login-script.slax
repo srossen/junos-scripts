@@ -1,0 +1,106 @@
+version 1.0;
+/*
+Version 1.0 of the login-script that does a quick health check by Chip Stewart
+Version 1.1 -- Minor modifications by Steve Rossen
+
+to use scp the file to /var/db/scripts/op/
+then
+set system scripts op file login-script.slax 
+
+to test, run "run op login-script"
+
+To apply so it automatically runs at login (adjust the class to your enviroment):
+set system login class network-manager login-script login-script.slax permissions all 
+*/
+
+ns junos = "http://xml.juniper.net/junos/*/junos";
+ns xnm = "http://xml.juniper.net/xnm/1.1/xnm";
+ns jcs = "http://xml.juniper.net/junos/commit-scripts/1.0";
+
+import "../import/junos.xsl";
+
+
+match / 
+{
+<op-script-results>  {
+
+var $query0 = { <command> 'show chassis alarms'; }
+var $result0 = jcs:invoke($query0);              
+<alarm-information> {
+ for-each($result0) { 
+  if ($result0/alarm-detail/alarm-class != '') {
+   <output> $result0/alarm-detail/alarm-class _' ALARM - ' _$result0/alarm-detail/alarm-description; 
+     }
+    } 
+   }
+
+var $query1 = { <command> 'show system alarms'; }
+var $result1 = jcs:invoke($query1);
+<alarm-information> {
+ for-each($result1) { 
+  if ($result1/alarm-detail/alarm-class != '') {
+   <output> $result1/alarm-detail/alarm-class _' ALARM - ' _$result1/alarm-detail/alarm-description; 
+     }
+    } 
+   }
+     
+var $query2 = { <command> 'show ldp interface'; }
+var $result2 = jcs:invoke($query2);              
+<ldp-interface-information> {
+ for-each($result2/ldp-interface[ldp-neighbor-count=='0']) { 
+  <output> 'LDP Configured and down on ' _$result2/ldp-interface/interface-name; 
+          } 
+    }
+
+var $query3 = { <command> 'show ospf interface'; }
+var $result3 = jcs:invoke($query3);              
+<ospf-interface-information> {
+ for-each($result3/ospf-interface[neighbor-count=='0']) { 
+  <output> 'OSPF Configured and down on ' _$result3/ospf-interface/interface-name; 
+         } 
+    }
+
+var $query4 = { <command> 'show bgp summary'; }
+var $result4 = jcs:invoke($query4);              
+<bgp-information> {
+ for-each($result4/bgp-peer[peer-state!='Established']) { 
+  <output> 'BGP Peer ' _$result4/bgp-peer/description _' ' _$result4/bgp-peer/peer-address _' is down. Current state: ' _$result4/bgp-peer/peer-state _' '; 
+         } 
+   }
+
+var $query5 = { <command> 'show l2circuit connections down'; }
+var $result5 = jcs:invoke($query5);              
+<l2circuit-connection-information> {
+ for-each($result5/l2circuit-neighbor/connection[connection-status!='Up']) { 
+  <output> 'L2Circuit to ' _$result5/l2circuit-neighbor/neighbor-address _' on ' _$result5/l2circuit-neighbor/connection/connection-id _' is down due to status ' _$result5/l2circuit-neighbor/connection/connection-status; 
+            } 
+     }
+
+/* If this is an access switch comment out this commands, up/down status is common on access switches. */
+var $query6 = { <command> 'show interfaces terse'; }
+var $result6 = jcs:invoke($query6);  
+<interface-information> {
+ for-each ($result6/physical-interface) { 
+  if ((admin-status=='up') && (oper-status=='down')) { 
+   <output> 'Physical Interface ' _name _' is Admin Up and Operationally Down to '_description; 
+          }
+       }
+    }
+
+/* Remove comment if you want to see who is already logged in at each login
+var $query7 = { <command> 'show system users'; }
+var $result7 = jcs:invoke($query7);              
+<system-users-information> { 
+ <output> 'System Uptime is ' _$result7/uptime-information/up-time; 
+ for-each($result7/uptime-information/user-table/user-entry) { <output> user _' is currently logged in from ' _from _' since ' _login-time; 
+    } 
+ }
+ */
+
+var $query8 = { <command> 'show system commit'; }
+var $result8 = jcs:invoke($query8);
+<commit-information> { 
+ <output> 'Last commit was ' _$result8/commit-history/date-time _' by: ' _$result8/commit-history/user; 
+   }
+ }
+}
