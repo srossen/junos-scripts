@@ -7,7 +7,7 @@ to use scp the file to /var/db/scripts/op/
 then
 set system scripts op file login-script.slax 
 
-to test, run "run op login-script"
+to test, run "run login-script"
 
 To apply so it automatically runs at login (adjust the class to your enviroment):
 set system login class network-manager login-script login-script.slax permissions all 
