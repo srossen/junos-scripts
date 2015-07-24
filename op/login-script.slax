@@ -1,16 +1,20 @@
 version 1.0;
 /*
-Version 1.0 of the login-script that does a quick health check by Chip Stewart
-Version 1.1 -- Minor modifications by Steve Rossen
-
-to use scp the file to /var/db/scripts/op/
-then
-set system scripts op file login-script.slax 
-
-to test, run "op login-script"
-
-To apply so it automatically runs at login (adjust the class to your enviroment):
-set system login class network-manager login-script login-script.slax permissions all 
+* Version 1.0 of the login-script that does a quick health check by Chip Stewart
+* Version 1.1 -- Minor modifications by Steve Rossen
+* 
+* to use scp the file to /var/db/scripts/op/
+* then
+* set system scripts op file login-script.slax 
+* 
+* to test, run "op login-script"
+* 
+* To apply so it automatically runs at login (adjust the class to your enviroment):
+* set system login class network-manager login-script login-script.slax permissions all 
+*
+* TO DO:
+* Clean up OSPF section to ignore loopbacks. Ideally ignore all passive interfaces but that is not stated in the XML output.
+*
 */
 
 ns junos = "http://xml.juniper.net/junos/*/junos";
@@ -88,14 +92,14 @@ var $result6 = jcs:invoke($query6);
     }
 
 /* Remove comment if you want to see who is already logged in at each login
-var $query7 = { <command> 'show system users'; }
-var $result7 = jcs:invoke($query7);              
-<system-users-information> { 
- <output> 'System Uptime is ' _$result7/uptime-information/up-time; 
- for-each($result7/uptime-information/user-table/user-entry) { <output> user _' is currently logged in from ' _from _' since ' _login-time; 
-    } 
- }
- */
+* var $query7 = { <command> 'show system users'; }
+* var $result7 = jcs:invoke($query7);              
+* <system-users-information> { 
+*  <output> 'System Uptime is ' _$result7/uptime-information/up-time; 
+*  for-each($result7/uptime-information/user-table/user-entry) { <output> user _' is currently logged in from ' _from _' since ' _login-time; 
+*     } 
+*  }
+*/
 
 var $query8 = { <command> 'show system commit'; }
 var $result8 = jcs:invoke($query8);
