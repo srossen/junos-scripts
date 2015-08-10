@@ -80,7 +80,7 @@ var $result5 = jcs:invoke($query5);
             } 
      }
 
-/* If this is an access switch comment out this commands, up/down status is common on access switches. */
+/* If this is an access switch comment out this section, up/down status is common on access switches. */
 var $query6 = { <command> 'show interfaces terse'; }
 var $result6 = jcs:invoke($query6);  
 <interface-information> {
