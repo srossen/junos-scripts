@@ -86,20 +86,19 @@ var $result6 = jcs:invoke($query6);
 <interface-information> {
  for-each ($result6/physical-interface) { 
   if ((admin-status=='up') && (oper-status=='down')) { 
-   <output> 'Physical Interface ' _name _' is Admin Up and Operationally Down to '_description; 
+   <output> 'Physical Interface ' _$result6/physical-interface/name _' is Admin Up and Operationally Down to '_$result6/physical-interface/description; 
           }
        }
     }
 
-/* Remove comment if you want to see who is already logged in at each login
-* var $query7 = { <command> 'show system users'; }
-* var $result7 = jcs:invoke($query7);              
-* <system-users-information> { 
-*  <output> 'System Uptime is ' _$result7/uptime-information/up-time; 
-*  for-each($result7/uptime-information/user-table/user-entry) { <output> user _' is currently logged in from ' _from _' since ' _login-time; 
-*     } 
-*  }
-*/
+
+var $query7 = { <command> 'show system users'; }
+var $result7 = jcs:invoke($query7);              
+<system-users-information> { 
+ <output> 'System Uptime is ' _$result7/uptime-information/up-time; 
+ for-each($result7/uptime-information/user-table/user-entry) { <output> user _' is currently logged in.'; 
+    } 
+ }
 
 var $query8 = { <command> 'show system commit'; }
 var $result8 = jcs:invoke($query8);
